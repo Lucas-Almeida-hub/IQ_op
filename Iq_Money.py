@@ -35,7 +35,7 @@ payout_stop = 10/100
 InicieAnalise=False
 API=''#Esta variavel vai receber o objeto do iQ
 velas_q = 100 #Quantidade de velas analisadas para o metodos de 'Banda de bolliger'
-
+#jhcjxc
 
 #-Configuração de Debug
 #nameDate ='IQ_MONEY_{}.log'.format(datetime.today())
@@ -456,14 +456,3 @@ def main():# Main
 print("Iniciando sistema ")
 main()
 
-'''
-    loguin()
-    print(Payout(par))
-    if(Payout(par)<payout_stop):
-        print("Payout menor que payout stop ")
-        print("valor de stop payout:{}".format(payout_stop))
-    if(Payout(par)>payout_stop):
-        print("Payout maior  que payout stop ")
-        print("valor de stop payout:{}".format(payout_stop))
-
-'''
