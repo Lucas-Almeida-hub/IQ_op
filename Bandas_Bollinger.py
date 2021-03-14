@@ -44,12 +44,14 @@ else:
 
 par ='EURUSD'
 velas_q = 100
+velas= API.get_candles(par,60,velas_q,time())
 
 while True:
 
     inicio =time()
-
     velas= API.get_candles(par,60,velas_q,time())
+
+    print(len(velas))
 
     dados_f ={
         'open': np.empty(velas_q),
