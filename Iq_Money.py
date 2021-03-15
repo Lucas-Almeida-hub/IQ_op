@@ -35,7 +35,7 @@ payout_stop = 10/100
 InicieAnalise=False
 API=''#Esta variavel vai receber o objeto do iQ
 velas_q = 100 #Quantidade de velas analisadas para o metodos de 'Banda de bolliger'
-#jhcjxc
+
 
 #-Configuração de Debug
 #nameDate ='IQ_MONEY_{}.log'.format(datetime.today())
@@ -360,7 +360,7 @@ def Payout(par):#Ler o payout da entrada
 
     return d
 
-def ParametroDeTrabalho():
+def ParametroDeTrabalho():# Resposavel por setar os parametros de trabalho 
     global email
     global senha
     global par 
