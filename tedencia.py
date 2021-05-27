@@ -2,31 +2,42 @@ from iqoptionapi.stable_api import IQ_Option
 import logging, json, sys, time
 import time
 
-logging.disable(level=(logging.DEBUG))
+email='lucasalmeidalds@hotmail.com'
+senha='lucaslds'
+par ='EURUSD-OTC'
+repra='PRACTICE'
+API=''
 
-API = IQ_Option('lucasalmeidalvs@gmail.com', 'lucaslds')
+def loguin():#Responsavel por realizar o loguin o site 
+    global API
+    global email
+    global senha
+    global par
 
-API = IQ_Option('lucasalmeidalvs@gmail.com', 'lucaslds')
-API.connect()
+    API = IQ_Option(email,senha)
 
-API.change_balance('PRACTICE') # PRACTICE / REAL
+    API.connect()
 
-if API.check_connect():
-	print('\n\nConectado com sucesso')
-else:
-	print('\n Erro ao se conectar')
-	sys.exit()
-	
+    API.change_balance(repra) # PRACTICE / REAL
+
+    if API.check_connect():
+        print('\nConectado com sucesso')
 
 
-par = 'EURUSD'
+    else:
+        print('\n Erro ao se conectar')
+        sys.exit()
+
+loguin()
+par = 'EURUSD-OTC'
 timeframe = 5
+while(1):
+    velas = API.get_candles(par, (int(timeframe) * 60), 5 ,  time.time())
 
-velas = API.get_candles(par, (int(timeframe) * 60),1,  time.time())
+    ultimo = round(velas[0]['close'], 4)
+    primeiro = round(velas[-1]['close'], 4)
 
+    diferenca = abs( round( ( (ultimo - primeiro) / primeiro ) * 100, 3) )
+    tendencia = "CALL" if ultimo < primeiro and diferenca > 0.01 else "PUT" if ultimo > primeiro and diferenca > 0.01 else False
 
-fechamento  = round(velas[0]['close'], 4) 
-abertura = round(velas[0]['close'], 4) 
-atual =
-
-print(tendencia)
+    print(tendencia)

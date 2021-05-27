@@ -11,7 +11,7 @@ logging.basicConfig(filename='myFractalResult.log', level=logging.INFO,format='%
 #logging.disable(level=(logging.DEBUG))
 #email=input("Digite seu email :")
 #senha=input("Digite sua senha ")
-email='lucasalmeidalvs@gmail.com'
+email='lucasalmeidalds@hotmail.com'
 senha='lucaslds'
 API = IQ_Option(email,senha)
 

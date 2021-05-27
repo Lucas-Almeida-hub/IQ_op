@@ -1,7 +1,5 @@
-#Desenvolvido :Lucas dos santos almeida
+#Desenvolvido :Lucas Almeida
 #Data:8/3/21
-
-
 
 #-Bibliotecas 
 from iqoptionapi.stable_api import IQ_Option #Responsavel  site #
@@ -11,12 +9,13 @@ import sys  #Reponsavel por controle do sistema operacional
 import numpy as np #Reponsavel por trabalha com matrix 
 from talib.abstract import * #Responsavel por operações financeira 
 from datetime import datetime #Responsavel por controle da data 
+from collections import deque #Reponsavel por log 
 
 #-Memorias Globais 
 
 email='lucasalmeidalds@hotmail.com'
 senha='lucaslds'
-par ='EURUSD-OTC'
+par ='EURUSD'#'EURUSD'
 repra='PRACTICE'
 stop_gain=20
 stop_loss =50
@@ -31,8 +30,13 @@ valor_entrada_b=0
 martingale=2
 operacao = 2
 payout = 0
+QuantidadeDados=100
 payout_stop = 10/100
 InicieAnalise=False
+candles=deque()
+duplacandles=deque()
+finalcandles = ''
+iniciocandles = ''
 API=''#Esta variavel vai receber o objeto do iQ
 velas_q = 100 #Quantidade de velas analisadas para o metodos de 'Banda de bolliger'
 
@@ -47,8 +51,6 @@ def loguin():#Responsavel por realizar o loguin o site
     global email
     global senha
     global par
-    
-
     
     API = IQ_Option(email,senha)
 
@@ -70,37 +72,38 @@ def comven(dir):#reponsavel por realizar o lance de compra ou venda
     global par
     global payout
     global lucro
+    global valor_entrada_b
 
-    valor_entrada_b=valor_entrada
-    while(i < martingale):
+    valor_entrada_b=valor_entrada+valor_entrada_b
+    print(valor_entrada_b)
 
-        print('Direção:',dir)
-        logging.info('Direção : {}'.format(dir))
-        status,id = API.buy_digital_spot(par,  valor_entrada_b, dir, 1)
-        i=i+1
-        if status:
-            while True:
-                status,valor = API.check_win_digital_v2(id)
-                
-                if status:
-                    print('Resultado operação: ', end='')
-                    print('WIN /' if valor > 0 else 'LOSS /' , round(valor, 2))
-                   # logging.info('Valor : {},{}'.format('WIN /' if valor > 0 else 'LOSS /' , round(valor, 2)))
-                    lucro+= round(valor, 2)
-                    if(valor >0):
-                        i=martingale
-                        print("fecho win")
-                    else:
-                        print("Vamos dinovo ")
-                        valor_entrada_b = Martingale(valor_entrada, payout)
-                        if(payout_stop >payout ):
-                            print("Abatido por valor de payout")
-                            i=martingale
+    print('Direção:',dir)
+    logging.info('Direção : {}'.format(dir))
+    status,id = API.buy_digital_spot(par,  valor_entrada_b, dir, 1)
+    i=i+1
+    if status:
+        while True:
+            status,valor = API.check_win_digital_v2(id)
+            
+            if status:
+                print('Resultado operação: ', end='')
+                print('WIN /' if valor > 0 else 'LOSS /' , round(valor, 2))
+                # logging.info('Valor : {},{}'.format('WIN /' if valor > 0 else 'LOSS /' , round(valor, 2)))
+                lucro+= round(valor, 2)
+                if(valor >0):
+    
+                    print("fecho win")
+                    valor_entrada_b = 0 
+                else:
+                    print("Vamos dinovo ")
+                    valor_entrada_b = Martingale(valor_entrada, payout)
+                    if(payout_stop >payout ):
+                        print("Abatido por valor de payout")
  
 
-                    stop(lucro, stop_gain, stop_loss)
+                stop(lucro, stop_gain, stop_loss)
                        
-                    break					
+                break					
         else:
             print('\nERRO AO REALIZAR OPERAÇÃO\n\n')
 
@@ -121,31 +124,32 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
         cicloVetor=cicloVetor+1
         if(cicloVetor>3):
             InicieAnalise=True
-            print(InicieAnalise)
+            #print(InicieAnalise)
             cicloVetor=0
         UtimoId=vetor['id'] 
 
 
     trava=0
     if(cicloVetor==0)&(trava==0):
-          #  print("to aqui-0 ")
+            #print("to aqui-0 ")
             Vetores[0]=[vetor['id'],vetor['open'],vetor['close'],(((vetor['open'])+(vetor['close']))/2),0]
             trava=1
     
     if(cicloVetor==1)&(trava==0): 
-         #   print("to aqui -1")
+            #print("to aqui -1")
             Vetores[1]=[vetor['id'],vetor['open'],vetor['close'],(((vetor['open'])+(vetor['close']))/2),1]
             trava=1
 
     if(cicloVetor==2)&(trava==0):
-          #  print("to aqui -2 ")
+            #print("to aqui -2 ")
             Vetores[2]=[vetor['id'],vetor['open'],vetor['close'],(((vetor['open'])+(vetor['close']))/2),2]
             trava=1
 
     if(cicloVetor==3)&(trava==0):
-         #   print("to aqui -3 ")
+            #print("to aqui -3 ")
             Vetores[3]=[vetor['id'],vetor['open'],vetor['close'],(((vetor['open'])+(vetor['close']))/2),3]
             trava=1
+            
 
 
     print(InicieAnalise)
@@ -154,7 +158,7 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
             print("Ordem de analis  0-1-2-3 ")
             if((Vetores[0][3])>(Vetores[1][3])>(Vetores[2][3])):
                 print("Decrecente")
-                if((Vetores[2][3]<Vetores[3][3])):# & (Vetores[1][3]==Vetores[3][3])):
+                if((Vetores[2][3]<Vetores[3][3])& (Vetores[1][3]==Vetores[3][3])):
                     print("APOSTA cima !!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[3][0])) 
                    # logging.info("Ordem de analis  0-1-2-3")
@@ -165,7 +169,7 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
                     print("continuando ")
             elif((Vetores[0][3])<(Vetores[1][3])<(Vetores[2][3])):
                 print("Crecrecente")
-                if((Vetores[2][3]>Vetores[3][3])):# & (Vetores[1][3]==Vetores[3][3])):
+                if((Vetores[2][3]>Vetores[3][3]) & (Vetores[1][3]==Vetores[3][3])):
                     print("APOSTA baixo !!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[3][0])) 
                    # logging.info("Ordem de analis  0-1-2-3")
@@ -181,7 +185,7 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
             print("Ordem de analis é 1-2-3-0 ")
             if((Vetores[1][3])>(Vetores[2][3])>(Vetores[3][3])):
                 print("Decrecente")
-                if((Vetores[3][3]<Vetores[0][3])):#& (Vetores[2][3]==Vetores[0][3])):
+                if((Vetores[3][3]<Vetores[0][3])& (Vetores[2][3]==Vetores[0][3])):
                     print("APOSTA cima !!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[0][0])) 
                    # logging.info("Ordem de analis é 1-2-3-0 ")
@@ -190,7 +194,7 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
                     return 'call'
             elif((Vetores[1][3])<(Vetores[2][3])<(Vetores[3][3])):
                 print("Crecrecente")
-                if((Vetores[3][3]>Vetores[0][3])):#& (Vetores[2][3]==Vetores[0][3])):
+                if((Vetores[3][3]>Vetores[0][3])& (Vetores[2][3]==Vetores[0][3])):
                     print("APOSTA baixo !!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[0][0])) 
                    # logging.info("Ordem de analis é 1-2-3-0 ")
@@ -199,12 +203,13 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
                     return 'put'
             else:
                 print("Nao a padrao")
+                return 'False'
                 
         elif((Vetores[2][0])<(Vetores[3][0])<(Vetores[0][0])<(Vetores[1][0])):
             print("Ordem de analis é 2-3-0-1")
             if((Vetores[2][3])>(Vetores[3][3])>(Vetores[0][3])):
                 print("Decrecente")
-                if((Vetores[0][3] < Vetores[1][3])):# & (Vetores[3][3] == Vetores[1][3])):
+                if((Vetores[0][3] < Vetores[1][3]) & (Vetores[3][3] == Vetores[1][3])):
                     print("APOSTA cima !!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[1][0])) 
                    # logging.info("Ordem de analis é 2-3-0-1")
@@ -213,7 +218,7 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
                     return 'call'
             elif(((Vetores[2][3])<(Vetores[3][3]))<(Vetores[0][3])):
                 print("Crecrecente")
-                if((Vetores[0][3] > Vetores[1][3])):#& (Vetores[3][3] ==Vetores[1][3])):
+                if((Vetores[0][3] > Vetores[1][3])& (Vetores[3][3] ==Vetores[1][3])):
                     print("APOSTA baixo !!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[1][0])) 
                    # logging.info("Ordem de analis é 2-3-0-1")
@@ -226,37 +231,43 @@ def fractal(vetor):#Responsavel por realizar a leitura de em modo fractal
             print("Ordem de analis é 3-0-1-2")
             if((Vetores[3][3])>(Vetores[0][3])>(Vetores[1][3])):
                 print("Decrecente")
-                if((Vetores[1][3] < Vetores[2][3])):#& (Vetores[0][3] == Vetores[2][3] )):
+                if((Vetores[1][3] < Vetores[2][3])& (Vetores[0][3] == Vetores[2][3] )):
                     print("APOSTA cima!!!!!!!!")
                     #logging.info("A vela de fractal :{}".format(Vetores[2][0])) 
                     #logging.info("Ordem de analis é 3-0-1-2")
                     #logging.info('Valores de vetores:{},{},{}'.format(Vetores[3][3],Vetores[0][3],Vetores[1][3]))
                     #logging.info('Valores de decisão :{} e {}'.format(Vetores[1][3],Vetores[2][3]))
                     return 'call'
+                else:
+                    return 'False'
             elif((Vetores[3][3])<(Vetores[0][3])<(Vetores[1][3])):
                 print("Crecrecente")
-                if((Vetores[1][3] > Vetores[2][3])):#& (Vetores[0][3] == Vetores[2][3])):
+                
+                if((Vetores[1][3] > Vetores[2][3])& (Vetores[0][3] == Vetores[2][3])):
                     print("APOSTA baixo !!!!!!!!")
                    # logging.info("A vela de fractal :{}".format(Vetores[2][0])) 
                    # logging.info("Ordem de analis é 3-0-1-2")
                    # logging.info('Valores de vetores:{},{},{}'.format(Vetores[3][3],Vetores[0][3],Vetores[1][3]))
                    # logging.info('Valores de decisão :{} e {}'.format(Vetores[1][3],Vetores[2][3]))
                     return 'put'
+                else:
+                    return 'False'
                 
             else:
                 print("Nao a padrao")
         else:
             print("ERRO")
+    else:
+        return 'False'
+
 
    # print(Vetores[0])
     #print(Vetores[1])
    # print(Vetores[2])
    # print(Vetores[3])
 
-def banda_bollinguer():#Responsavel por analisar por meio da Banda de Bollinguer 
+def banda_bollinguer(velas_local):#Responsavel por analisar por meio da Banda de Bollinguer 
         velas_qua=100
-        velas_local= API.get_candles(par, 60,100, time.time())
-
         inicio =time.time()
         dados_f ={
             'open': np.empty(velas_qua),
@@ -276,7 +287,7 @@ def banda_bollinguer():#Responsavel por analisar por meio da Banda de Bollinguer
 
         up = round(up[len (up)-3],5)
         low = round (low[len(low)-3],5)
-        taxa_atual = round( velas_local[98]['close'],5)
+        taxa_atual = round( velas_local[99]['close'],5)
 
         if (taxa_atual>= up )or (taxa_atual<=low):
            # print("carreagando informaçoes par  compra ")
@@ -287,21 +298,19 @@ def banda_bollinguer():#Responsavel por analisar por meio da Banda de Bollinguer
                 #logging.info("A vela de banda é a {}" .format( velas_local[98]['id']))
                 return 'call'
 
-def mhi(vetor1,vetor2,vetor3):#Responsavel por analisar por meio de MHI
+def parabolic(vetor1,vetor2,vetor3):#Responsavel por analisar por meio de MHI
 
     minutos = float(((datetime.now()).strftime('%M.%S'))[1:])
     if ((minutos >= 4.58 and minutos <= 5)or(minutos >= 9.58)):
         entrar = True
     else:
         entrar = False 
-    print('Hora de entrar? {} / Minutos: {} '.format(entrar,minutos))
+  
 
     if entrar:
-        print('\n\nIniciando operação!')
         dir = False
-        print('Verificando cores..', end='')
         velas=[0]*3
-        velas[0] = vetor1#  API.get_candles(par, 60, 3, time.time())
+        velas[0] = vetor1
         velas[1] = vetor2
         velas[2] = vetor3
 
@@ -315,12 +324,16 @@ def mhi(vetor1,vetor2,vetor3):#Responsavel por analisar por meio de MHI
         if cores.count('g') > cores.count('r') and cores.count('d') == 0 :
             return 'put'
         if cores.count('r') > cores.count('g') and cores.count('d') == 0 : 
-            #logging.info("Modelo : MHI | direcao : Call")
             return 'call'
+        else:
+            return False
+    else:
+        return False
     time.sleep(0.5)
 
 def tendencia(velas):#Responsavel por analisar por meio da tendencia 
-    ultimo = round(velas[89]['close'], 4)
+   # print(len(velas))
+    ultimo = round(velas[QuantidadeDados-1]['close'], 4)
     primeiro = round(velas[-1]['close'], 4)
 
     diferenca = abs( round( ( (ultimo - primeiro) / primeiro ) * 100, 3) )
@@ -361,6 +374,7 @@ def Payout(par):#Ler o payout da entrada
     return d
 
 def ParametroDeTrabalho():# Resposavel por setar os parametros de trabalho 
+
     global email
     global senha
     global par 
@@ -381,77 +395,174 @@ def ParametroDeTrabalho():# Resposavel por setar os parametros de trabalho
     stop_loss =float(input(' Digite o valor para stop loss:'))
     payout_stop=float(input(' Digite o valor Minimo de Payout '))/100
 
+def fractal2 (vetor):
+    global iniciocandles
+    global finalcandles 
+    global candles 
+    global duplacandles
+    global UtimoId
+
+    ids = (vetor['id']) #input("digite o id ")
+    x= (vetor['close']) #int(input("Digite qualquer numero : " ))
+    if(UtimoId != (vetor['id'])):
+    #if(UtimoId != ids):
+        UtimoId=vetor['id'] 
+        duplacandles.append(x)
+    if(UtimoId ==(vetor['id'])):
+    #if(UtimoId == ids):
+        duplacandles[len(duplacandles)-1]=x
+  
+    print(duplacandles)
+    
+    if (len(duplacandles)==3):
+        if(duplacandles[0]<duplacandles[1])& (duplacandles[1]<duplacandles[2]):
+            finalcandles = True   
+        elif(duplacandles[0]>duplacandles[1])& (duplacandles[1]>duplacandles[2]):
+            finalcandles = False
+        else:
+            finalcandles = None
+       # print("valor da posição 4 :{} 5 :{}".format (duplacandles[1],duplacandles[2]))
+        candles.append(duplacandles.popleft())
+        #print(candles)
+    if(len(candles)==3):
+        if(candles[0]<candles[1]) & (candles[1]<candles[2]):
+            iniciocandles = True
+        elif(candles[0]>candles[1]) & (candles[1]>candles[2]):
+            iniciocandles = False
+        else:
+            finalcandles = None
+        
+       # print("valor da posição 1:{} 2:{} 3:{}".format (candles [0],candles [1],candles[2]))
+        
+        candles.popleft()
+
+        # Tru quando a aumento 
+        # false quando a decida 
+        if(iniciocandles==True)&(finalcandles==True):
+            return "Crecente "
+        elif(iniciocandles==True)&(finalcandles==False):
+            return "call"
+        elif(iniciocandles==False)&(finalcandles==False):
+            return "Decrecente"
+        elif(iniciocandles==False)&(finalcandles==True):
+            return "put"
+        elif(iniciocandles==None)&(finalcandles==None):
+            return "Sem padrão"
+
+def volume(velas_local):
+        velas_qua=100
+        inicio =time.time()
+        dados_f ={
+            'open': np.empty(velas_qua),
+            'high': np.empty(velas_qua),
+            'low' : np.empty(velas_qua),
+            'close' : np.empty(velas_qua),
+            'volume' : np.empty(velas_qua),
+        }
+        for x in range (0,velas_q):
+            #dados_f['open'] [x] =  velas_local[x]['open']
+            #dados_f['high'] [x] =  velas_local[x]['max']
+            #dados_f['low'][x] =  velas_local[x]['min']
+            dados_f['close'][x] =  velas_local[x]['close']
+            dados_f['volume'] [x]=  velas_local[x]['volume']
+
+        #up, mid, low = BBANDS(dados_f, timeperiod=17, nbdevup=2.627924, nbdevdn=2.627924, matype=0)
+        real  =  OBV ( dados_f)
+        if(real[97]<real[98])& (real[98]<real[99]):
+             Vol = 'put'  
+        elif(real[97]>real[98])& (real[98]>real[99]):
+             Vol = 'call'
+        else:
+             Vol = None
+        return  Vol
+    
 def main():# Main
 
     global payout
+    tempo =2
    # ParametroDeTrabalho()
     loguin()
-    #logging.info("INICIANDO EXE")
     payout=Payout(par)
-    #comven('put')
-    while True:
-        dados_recebidos = API.get_candles(par, 60,1, time.time())
-        time.sleep(1)
-        bollinguer=banda_bollinguer()
-        Fractal = fractal(dados_recebidos[-1])
-        #Tendencia = tendencia(dados_recebidos)
-        valoresDeTedencia=10
-        valoresDeBolliguer=10
-        ValoresDeFractal=60
-        indicesPut=0
+    Dev =2
+    while(Dev==1):#Laços de teste 
+        dados_recebidos = API.get_candles(par, 60,QuantidadeDados, time.time())
+        Parabolic=parabolic(dados_recebidos[97],dados_recebidos[98], dados_recebidos[99])
+        print(Parabolic)
+       # comven('put')
+    while(Dev==2):#laços de funcionamento 
+        indicesPut=0 
         indicesCall=0
-        print("Resposta do modole Fractal : {} ".format(Fractal))
-        print("Resposta do modole Bollinguer : {} ".format(bollinguer))
-       # print("Resposta do modole Tedencia : {} ".format(Tendencia))
-        if(bollinguer=='call'):
-            indicesPut=indicesPut-valoresDeBolliguer
-            indicesCall=indicesCall+valoresDeBolliguer
-            #logging.info("Modelo :Banda Bollinguer | direcao : call")
-        # comven('call')
+        dados_recebidos = API.get_candles(par, 60*tempo,QuantidadeDados, time.time())
+        time.sleep(1)
+        Parabolic=parabolic(dados_recebidos[97],dados_recebidos[98], dados_recebidos[99])
+        Fractal = fractal2(dados_recebidos[-1])
+        Bollinguer=banda_bollinguer(dados_recebidos)
+        Tendencia = tendencia(dados_recebidos)
+        Volume = volume(dados_recebidos)
+        valoresDeParabolic=29
+        valoresDeVolume=22
+        valoresDeTedencia=0
+        valoresDeBolliguer=21
+        ValoresDeFractal=30
+        if(InicieAnalise==False):
+            print("Carregando buffer de analise ")
+        if(InicieAnalise==True):
+            print("")
+            print("Resposta do modole Fractal    : {} ".format(Fractal))
+            print("Resposta do modole Bollinguer : {} ".format(Bollinguer))
+            print("Resposta do modole Tedencia   : {} ".format(Tendencia))
+            print("Resposta do modole Volume     : {} ".format(Volume))
+            print("Resposta do modole Parabolic  : {} ".format(Parabolic))
+            print("")
+            if(Parabolic=='call'):
+                indicesPut=indicesPut-valoresDeParabolic
+                indicesCall=indicesCall+valoresDeParabolic
 
-        if(bollinguer=='put'):
-            indicesPut=indicesPut+valoresDeBolliguer
-            indicesCall=indicesCall-valoresDeBolliguer
-            #logging.info("Modelo :Banda Bollinguer | direcao : Put")
-        # comven('put')
+            elif(Parabolic=='put'):
+                indicesPut=indicesPut+valoresDeParabolic
+                indicesCall=indicesCall-valoresDeParabolic
 
-        if(Fractal=='call'):
-            indicesPut=indicesPut-ValoresDeFractal
-            indicesCall=indicesCall+ValoresDeFractal
-            #logging.info("Modelo :Fractal | direcao : call")
-        # comven('call')
+            if(Bollinguer=='call'):
+                indicesPut=indicesPut-valoresDeBolliguer
+                indicesCall=indicesCall+valoresDeBolliguer
 
-        if(Fractal=='put'):
-            indicesPut=indicesPut+ValoresDeFractal
-            indicesCall=indicesCall-ValoresDeFractal
-            #logging.info("Modelo :Fractal | direcao : Put")
-            #comven('put')
+            elif(Bollinguer=='put'):
+                indicesPut=indicesPut+valoresDeBolliguer
+                indicesCall=indicesCall-valoresDeBolliguer
 
-       # if(Tendencia=='call'):
-        # indicesPut=indicesPut-valoresDeTedencia
-        # indicesCall=indicesCall+valoresDeTedencia
-          #  logging.info("Modelo :Tedencia | direcao : call")
-        # comven('call')
+            if(Fractal=='call'):
+                indicesPut=indicesPut-ValoresDeFractal
+                indicesCall=indicesCall+ValoresDeFractal
 
-       # if(Tendencia=='put'):
-        # indicesPut=indicesPut+valoresDeTedencia
-        # indicesCall=indicesCall-valoresDeTedencia
-          #  logging.info("Modelo :Tedencia | direcao : Put")
-            #comven('put')  
+            elif(Fractal=='put'):
+                indicesPut=indicesPut+ValoresDeFractal
+                indicesCall=indicesCall-ValoresDeFractal
 
-        print("valor porcentual de entrada para Put é : {}%".format(indicesPut))
-        print("valor porcentual de entrada para call é : {}%".format(indicesCall))
+            if(Tendencia=='call'):
+                indicesPut=indicesPut-valoresDeTedencia
+                indicesCall=indicesCall+valoresDeTedencia
 
+            elif(Tendencia=='put'):
+                indicesPut=indicesPut+valoresDeTedencia
+                indicesCall=indicesCall-valoresDeTedencia
 
+            if(Volume=='call'):
+                indicesPut=indicesPut-valoresDeVolume
+                indicesCall=indicesCall+valoresDeVolume
 
-        if(indicesPut>=50):
-            #logging.info("valor porcentual de entrada para Put é : {}%".format(indicesPut))
-            comven('put')
+            elif(Volume=='put'):
+                indicesPut=indicesPut+valoresDeVolume
+                indicesCall=indicesCall-valoresDeVolume
             
-        if(indicesCall>=50):
-            #logging.info("valor porcentual de entrada para call é : {}%".format(indicesCall))
-            comven('call')
+            print("Valor porcentual de entrada para Put  é : {}%".format(indicesPut))
+            print("Valor porcentual de entrada para call é : {}%".format(indicesCall))
+            print("")
 
+            if(indicesPut==51):
+                comven('put')
+                
+            if(indicesCall==51):
+                comven('call')
 
 print("Iniciando sistema ")
 main()

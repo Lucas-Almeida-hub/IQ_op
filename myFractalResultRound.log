@@ -1,3 +1,0 @@
-2021-02-15 13:30:55,625 ERROR on_error => [Errno 110] Connection timed out
-2021-02-15 13:31:27,666 INFO <module> => Iniciando EXE
-2021-02-15 13:38:02,792 ERROR get_candles => **error** get_candles need reconnect
