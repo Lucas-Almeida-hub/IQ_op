@@ -499,11 +499,11 @@ def main():# Main
         Bollinguer=banda_bollinguer(dados_recebidos)
         Tendencia = tendencia(dados_recebidos)
         Volume = volume(dados_recebidos)
-        valoresDeParabolic=29
-        valoresDeVolume=22
+        valoresDeParabolic=1
+        valoresDeVolume=1
         valoresDeTedencia=0
-        valoresDeBolliguer=21
-        ValoresDeFractal=30
+        valoresDeBolliguer=1
+        ValoresDeFractal=1
         if(InicieAnalise==False):
             print("Carregando buffer de analise ")
         if(InicieAnalise==True):
@@ -558,10 +558,10 @@ def main():# Main
             print("Valor porcentual de entrada para call é : {}%".format(indicesCall))
             print("")
 
-            if(indicesPut==51):
+            if(indicesPut==3):
                 comven('put')
                 
-            if(indicesCall==51):
+            if(indicesCall==3):
                 comven('call')
 
 print("Iniciando sistema ")
