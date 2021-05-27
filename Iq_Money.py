@@ -495,7 +495,7 @@ def main():# Main
         dados_recebidos = API.get_candles(par, 60*tempo,QuantidadeDados, time.time())
         time.sleep(1)
         Parabolic=parabolic(dados_recebidos[97],dados_recebidos[98], dados_recebidos[99])
-        Fractal = fractal2(dados_recebidos[-1])
+        Fractal = fractal(dados_recebidos[-1])
         Bollinguer=banda_bollinguer(dados_recebidos)
         Tendencia = tendencia(dados_recebidos)
         Volume = volume(dados_recebidos)
