@@ -1,0 +1,17 @@
+FROM python
+#RUN cd /bash/usr
+RUN apt-get -y update 
+RUN mkdir Iq_Opition
+RUN mkdir kkkkk
+RUN ls
+RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz  
+RUN tar -xzf ta-lib-0.4.0-src.tar.gz 
+RUN rm ta-lib-0.4.0-src.tar.gz 
+RUN cd ta-lib/  && ./configure --prefix=/usr && make && make install
+RUN cd ~ 
+RUN rm -rf ta-lib/
+RUN pip install ta-lib
+RUN git clone https://github.com/Lu-Yi-Hsun/iqoptionapi.git
+RUN cd iqoptionapi && python setup.py install
+RUN cd Iq_Opition && git clone https://github.com/Lucas-Almeida-hub/IQ_op.git 
+
