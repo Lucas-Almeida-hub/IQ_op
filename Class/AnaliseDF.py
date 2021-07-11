@@ -86,7 +86,7 @@ class Analise:
             return True
 
 '''
-
+dsdsds
     def compute_percentage(x):
         pct = float(x/p['score'].sum()) * 100
         return round(pct, 2)
