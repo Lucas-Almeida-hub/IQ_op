@@ -4,6 +4,7 @@ import pandas as pd
 Dados =''
 Padrao=''
 Resut =''
+DadosPorcent=''
 
 
 class Analise:
@@ -51,18 +52,48 @@ class Analise:
         #Dados.Student.pct_change()
         # size()
     
-    def analiseDFPORCENT(self):
-        #data = {'a':[2,2,0],'b':[1,0,1],'c':[1,0,0]}
+    def __analiseDFPORCENT__():
+        global DadosPorcent
         print(Dados)
-        A =(Dados.groupby(['Parabolic,Bollinguer,Fractal,Tendencia,Volume','Resut']).size()/100)
-        print(A)
-       # A['perc'] = A['Resut']
-      #  print(A)
+        A =(Dados.groupby(['Parabolic,Bollinguer,Fractal,Tendencia,Volume','Resut']).size()/Dados['Resut'].count()*100)
+        A = A.groupby(level=0).apply(lambda x:100 * x / float(x.sum()))
+        DadosPorcent = A
+        print(DadosPorcent)
+        
+ 
+    def requestAnalise(self,analise):
+        global DadosPorcent
+        Analise.__analiseDFPORCENT__()
 
+        
+        try:
+            Dwin=(DadosPorcent[analise,'WIN'])
+        except:
+            Dwin=0
+        try:
+            Dloss=(DadosPorcent[analise,'LOSS'])
+        except:
+            Dloss=0
+    
+        print (Dwin)
+        
+        print(Dwin)
+        if(Dwin>Dloss):
+            return True
+        elif(Dwin<Dloss):
+            return False
+        elif(Dwin==Dloss):
+            return True
 
+'''
 
+    def compute_percentage(x):
+        pct = float(x/p['score'].sum()) * 100
+        return round(pct, 2)
 
+   # p['percentage'] = p.apply(compute_percentage, axis=1)
 
+'''
 
 
 

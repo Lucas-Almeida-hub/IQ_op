@@ -1,11 +1,11 @@
 from AnaliseDF import Analise
 
-x=Analise()
 
+x=Analise()
 x.loadDF()
 #print(x.analiseDf())
-print(x.analiseDFPORCENT())
-#x.incertDF('{}'.format('False,put,None,put,put'),'{}'.format('WIN'))
+#print(x.analiseDFPORCENT())
+print(x.requestAnalise("False,put,put,put,put"))
 #x.saveDF()
 
 '''
