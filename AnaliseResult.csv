@@ -1,5 +1,12 @@
 "Parabolic,Bollinguer,Fractal,Tendencia,Volume",Resut,0
+"False,call,False,call,call",LOSS,1
+"False,call,False,call,call",WIN,2
+"False,call,None,call,call",LOSS,3
+"False,call,None,call,call",WIN,4
 "False,put,False,put,put",WIN,2
 "False,put,None,put,put",LOSS,3
-"False,put,None,put,put",WIN,2
+"False,put,None,put,put",WIN,3
+"False,put,put,put,None",LOSS,1
+"call,call,None,False,call",LOSS,1
+"call,call,None,False,call",WIN,1
 "put,None,None,put,put",LOSS,1

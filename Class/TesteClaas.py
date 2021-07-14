@@ -1,10 +1,9 @@
 from AnaliseDF import Analise
 
-
 x=Analise()
 x.loadDF()
-#print(x.analiseDf())
-#print(x.analiseDFPORCENT())
+print(x.analiseDf())
+
 print(x.requestAnalise("False,put,put,put,put"))
 #x.saveDF()
 

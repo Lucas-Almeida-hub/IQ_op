@@ -1,5 +1,12 @@
 "Parabolic,Bollinguer,Fractal,Tendencia,Volume",Resut,0
+"False,call,False,call,call",LOSS,33.333333333333336
+"False,call,False,call,call",WIN,66.66666666666667
+"False,call,None,call,call",LOSS,42.857142857142854
+"False,call,None,call,call",WIN,57.14285714285714
 "False,put,False,put,put",WIN,100.0
-"False,put,None,put,put",LOSS,60.0
-"False,put,None,put,put",WIN,40.0
+"False,put,None,put,put",LOSS,50.0
+"False,put,None,put,put",WIN,50.0
+"False,put,put,put,None",LOSS,100.0
+"call,call,None,False,call",LOSS,50.0
+"call,call,None,False,call",WIN,50.0
 "put,None,None,put,put",LOSS,100.0

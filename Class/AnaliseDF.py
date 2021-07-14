@@ -58,6 +58,7 @@ class Analise:
         A =(Dados.groupby(['Parabolic,Bollinguer,Fractal,Tendencia,Volume','Resut']).size()/Dados['Resut'].count()*100)
         A = A.groupby(level=0).apply(lambda x:100 * x / float(x.sum()))
         DadosPorcent = A
+        A.to_csv("AnaliseResultPorcentual.csv")
         print(DadosPorcent)
         
  
